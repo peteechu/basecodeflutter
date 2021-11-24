@@ -34,4 +34,16 @@ class AuthService {
     }
   }
 
+  Future<UserCredential> createUser(String email, String password) async {
+    return await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+  }
+      
+  
+  Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
+
+    return await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+
+  }
+      
+
 }

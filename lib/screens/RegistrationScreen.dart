@@ -1,4 +1,8 @@
+import 'package:basecode/screens/DashboardScreen.dart';
 import 'package:basecode/screens/LoginScreen.dart';
+import 'package:basecode/model/User.dart';
+import 'package:basecode/services/DatabaseService.dart';
+import 'package:basecode/services/LocalStorageService.dart';
 import 'package:basecode/widgets/CustomTextFormField.dart';
 import 'package:basecode/widgets/PasswordField.dart';
 import 'package:basecode/widgets/PrimaryButton.dart';
@@ -15,9 +19,19 @@ class RegistrationScreen extends StatefulWidget {
   RegistrationScreenState createState() => RegistrationScreenState();
 }
 
+
 class RegistrationScreenState extends State<RegistrationScreen> {
+  DatabaseService _databaseService = DatabaseService();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
+
+  final fname = TextEditingController();
+  final lname= TextEditingController();
+  final email = TextEditingController();
+  final pass = TextEditingController();
+  final confirmpass = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -41,7 +55,8 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                       hintText:
                           "First Name must have a minimum of 4 characters.",
                       iconData: FontAwesomeIcons.user,
-                      controller: TextEditingController()),
+                      controller: fname,
+                      ),
                   SizedBox(
                     height: 20.0,
                   ),
@@ -50,7 +65,8 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                       hintText:
                           "First Name must have a minimum of 4 characters.",
                       iconData: FontAwesomeIcons.user,
-                      controller: TextEditingController()),
+                      controller: lname,
+                      ),
                   SizedBox(
                     height: 20.0,
                   ),
@@ -58,7 +74,8 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                       labelText: "Email",
                       hintText: "Enter a valid email.",
                       iconData: FontAwesomeIcons.solidEnvelope,
-                      controller: TextEditingController()),
+                      controller: email,
+                      ),
                   SizedBox(
                     height: 20.0,
                   ),
@@ -71,7 +88,8 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                       },
                       labelText: "Password",
                       hintText: "Enter your password",
-                      controller: TextEditingController()),
+                      controller: pass,
+                      ),
                   SizedBox(
                     height: 20.0,
                   ),
@@ -84,16 +102,15 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                       },
                       labelText: "Confirm Password",
                       hintText: "Your passwords must match.",
-                      controller: TextEditingController()),
+                      controller: confirmpass,
+                      ),
                   SizedBox(
                     height: 20.0,
                   ),
                   PrimaryButton(
                       text: "Register",
                       iconData: FontAwesomeIcons.solidFolder,
-                      onPress: () {
-                        print("Register button");
-                      }),
+                      onPress: register),
                   SizedBox(
                     height: 20.0,
                   ),
@@ -119,5 +136,27 @@ class RegistrationScreenState extends State<RegistrationScreen> {
         ),
       ),
     );
+  }
+
+  
+  register() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    var user = User(fname.text,lname.text,email.text,pass.value.text);
+    
+    var result = await _databaseService.registerUser(user);
+
+    if(result != null){
+      LocalStorageService.setName(result.user.displayName);
+      LocalStorageService.setUid(result.user.uid);
+      LocalStorageService.setUid(result.user.refreshToken);
+
+      Get.offNamed(DashboardScreen.routeName);
+    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 }
